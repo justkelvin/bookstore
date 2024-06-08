@@ -1,7 +1,7 @@
 // Display book lists
 
 import React from 'react';
-import { List, ListItem, ListItemText, IconButton } from '@mui/material';
+import { List, ListItem, ListItemText, IconButton, ListItemAvatar, Avatar } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import toast from 'react-hot-toast';
 
@@ -22,6 +22,16 @@ const BookList = ({ books, onRemove }) => {
                         <DeleteIcon />
                     </IconButton>
                 }>
+                    <ListItemAvatar>
+                        <Avatar
+                            alt={book.title}
+                            src={
+                                book.coverPhotoURL ?
+                                    require(`../assets/${book.coverPhotoURL.replace('assets/', '')}`) :
+                                    ''
+                            }
+                        />
+                    </ListItemAvatar>
                     <ListItemText primary={book.title} secondary={book.author} />
                 </ListItem>
             ))}
