@@ -1,6 +1,6 @@
 import './App.css';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@apollo/client';
 import { Box, Container, Typography, Grid, styled } from '@mui/material';
 import SearchBar from './components/SearchBar';
@@ -38,6 +38,8 @@ const App = () => {
   const [searchResults, setSearchResults] = useState([]);
   const { loading, error, data } = useQuery(GET_BOOKS);
   const notify = (message) => toast.success(message);
+  const searchResultsRef = useRef(null);
+  const [showResults, setShowResults] = useState(false);
 
   const addBookToReadingList = (book) => {
     setReadingList([...readingList, book]);
@@ -64,6 +66,28 @@ const App = () => {
     return () => clearTimeout(timeoutId);
   }, [searchTerm, data]);
 
+  const handleClickOutside = (event) => {
+    if (searchResultsRef.current && !searchResultsRef.current.contains(event.target)) {
+      setShowResults(false);
+    }
+  };
+
+  useEffect(() => {
+    // Add click listener to the document
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (searchTerm) {
+      setShowResults(true); // Show results when search term is not empty
+    } else {
+      setShowResults(false); // Hide results when search term is empty
+    }
+  }, [searchTerm]);
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
@@ -74,14 +98,13 @@ const App = () => {
       <Box display="flex" mt={2}>
         <Grid container spacing={8}>
           <Grid item xs={12} md={9}>
-            {/* <SearchBar books={data.books} /> */}
             <StyledSearchBox>
               <SearchBar
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
               />
-              {searchResults.length > 0 && (
-                <StyledSearchResults>
+              {showResults && ( // Conditionally render results
+                <StyledSearchResults ref={searchResultsRef}>
                   <BookResult
                     books={searchResults}
                     onAdd={addBookToReadingList}
